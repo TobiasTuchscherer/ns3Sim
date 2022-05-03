@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
   bool adrEnabled = true;
   bool initializeSF = false;
   int nDevices = 300;
-  int nPeriods = 640;
+  int nPeriods = 50;
   double mobileNodeProbability = 0;
   double sideLength = 1000;
   int gatewayDistance = 500;
@@ -119,9 +119,9 @@ int main (int argc, char *argv[])
 		 packetSize);
    cmd.Parse (argc, argv);
 
-//   int gatewayRings = 2 + (std::sqrt(2) * sideLength) / (gatewayDistance);
-//   int nGateways = 3*gatewayRings*gatewayRings-3*gatewayRings+1;
-  int nGateways = 1;
+   int gatewayRings = 2 + (std::sqrt(2) * sideLength) / (gatewayDistance);
+   int nGateways = 3*gatewayRings*gatewayRings-3*gatewayRings+1;
+//  int nGateways = 1;
    // Logging
    //////////
 
@@ -255,7 +255,7 @@ int main (int argc, char *argv[])
   helper.Install (phyHelper, macHelper, endDevices);
 
   // Install applications in EDs
-  int appPeriodSeconds = 600;      // One packet every 10 minutes
+  int appPeriodSeconds = 900;      // One packet every 15 minutes
   PeriodicSenderHelper appHelper = PeriodicSenderHelper ();
   appHelper.SetPeriod (Seconds (appPeriodSeconds));
   ApplicationContainer appContainer = appHelper.Install (endDevices);
@@ -284,7 +284,6 @@ int main (int argc, char *argv[])
   // Install the Forwarder application on the gateways
   ForwarderHelper forwarderHelper;
   forwarderHelper.Install (gateways);
-
   // Connect our traces
   Config::ConnectWithoutContext(
 				 "/NodeList/*/DeviceList/0/$ns3::LoraNetDevice/Mac/$ns3::EndDeviceLorawanMac/TxPower",
@@ -294,18 +293,13 @@ int main (int argc, char *argv[])
 				 "/NodeList/*/DeviceList/0/$ns3::LoraNetDevice/Mac/$ns3::EndDeviceLorawanMac/DataRate",
 				 MakeCallback (&OnDataRateChange));
 
-  //Ptr<ns3::lorawan::LoraPhy> myObject = CreateObject<ns3::lorawan::LoraPhy> ();
-  //myObject->TraceConnectWithoutContext("StartSending",
-  //			MakeCallback(&BeginPacket));
-
-
-  // Activate printing of ED MAC parameters
+// Activate printing of ED MAC parameters
   Time stateSamplePeriod = Seconds (900);
   helper.EnablePeriodicDeviceStatusPrinting (endDevices, gateways, "nodeData.txt", stateSamplePeriod);
   helper.EnablePeriodicPhyPerformancePrinting (gateways, "phyPerformance.txt", stateSamplePeriod);
   helper.EnablePeriodicGlobalPerformancePrinting ("globalPerformance.txt", stateSamplePeriod);
-  helper.EnablePacketTracking();
-//  helper.DoPrintDeviceStatus(endDevices, gateways, "deviceData.txt");
+
+
 
   LoraPacketTracker& tracker = helper.GetPacketTracker ();
 
